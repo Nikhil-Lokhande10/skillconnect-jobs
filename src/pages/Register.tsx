@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,9 @@ import { User, Briefcase, MapPin, Upload, Mail, Phone, Lock } from "lucide-react
 import Navbar from "@/components/Navbar";
 
 const Register = () => {
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') === 'worker' ? 'worker' : 'customer';
+  
   const [userFormData, setUserFormData] = useState({
     fullName: "",
     email: "",
@@ -59,7 +62,7 @@ const Register = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="customer" className="w-full">
+          <Tabs defaultValue={initialTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8">
               <TabsTrigger value="customer" className="flex items-center gap-2">
                 <User className="h-4 w-4" />

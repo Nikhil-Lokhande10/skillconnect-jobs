@@ -1,4 +1,5 @@
 import { Search, MapPin, Briefcase } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-workers.jpg";
@@ -98,9 +99,11 @@ const Hero = () => {
                 <p className="text-white/80">
                   Join our platform and connect with customers who need your skills.
                 </p>
-                <Button variant="outline" size="lg" className="w-full border-white text-white hover:bg-white hover:text-primary">
-                  Join as Worker
-                </Button>
+                <Link to="/register?tab=worker">
+                  <Button variant="outline" size="lg" className="w-full border-white text-white hover:bg-white hover:text-primary">
+                    Join as Worker
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
