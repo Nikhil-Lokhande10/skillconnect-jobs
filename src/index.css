@@ -8,6 +8,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Skillconnect Brand Colors - Professional Service Platform */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,42 +18,61 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary: Deep Blue for Trust & Reliability */
+    --primary: 213 94% 68%;
+    --primary-foreground: 0 0% 100%;
+    --primary-dark: 213 94% 48%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary: Warm Orange for Actions */
+    --secondary: 24 95% 53%;
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 213 94% 95%;
+    --accent-foreground: 213 94% 28%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 213 94% 68%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
+    /* Success color for completed jobs */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning for pending items */
+    --warning: 43 89% 58%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Gradients for hero sections */
+    --gradient-hero: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 48%));
+    --gradient-card: linear-gradient(135deg, hsl(213 94% 68% / 0.1), hsl(213 94% 48% / 0.05));
+    --gradient-accent: linear-gradient(135deg, hsl(24 95% 53%), hsl(24 95% 43%));
+
+    /* Shadows with brand colors */
+    --shadow-primary: 0 10px 30px -5px hsl(213 94% 68% / 0.2);
+    --shadow-card: 0 4px 20px -2px hsl(213 94% 68% / 0.1);
+    --shadow-glow: 0 0 40px hsl(213 94% 68% / 0.3);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Sidebar */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
+    --sidebar-primary: 213 94% 68%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 213 94% 95%;
+    --sidebar-accent-foreground: 213 94% 28%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 213 94% 68%;
   }
 
   .dark {
