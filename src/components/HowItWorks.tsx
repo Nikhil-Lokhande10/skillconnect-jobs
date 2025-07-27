@@ -29,7 +29,7 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-20 bg-background">
+    <section id="how-it-works" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
@@ -85,10 +85,16 @@ const HowItWorks = () => {
             Ready to get started?
           </h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transform hover:-translate-y-0.5 transition-all duration-300">
+            <button 
+              className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transform hover:-translate-y-0.5 transition-all duration-300"
+              onClick={() => window.location.href = '/register?tab=customer'}
+            >
               Post Your First Job
             </button>
-            <button className="border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transition-all duration-300">
+            <button 
+              className="border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transition-all duration-300"
+              onClick={() => window.location.href = '/register?tab=worker'}
+            >
               Join as Professional
             </button>
           </div>

@@ -1,7 +1,10 @@
 import { Wrench, Zap, Paintbrush, Hammer, Car, Home, Droplets, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 const ServiceCategories = () => {
+  const [showAllServices, setShowAllServices] = useState(false);
+  
   const categories = [
     { 
       icon: Wrench, 
@@ -61,12 +64,45 @@ const ServiceCategories = () => {
     },
   ];
 
+  const additionalServices = [
+    { 
+      icon: Wrench, 
+      name: "Landscaping", 
+      description: "Garden design, maintenance, lawn care",
+      jobs: "500+ jobs",
+      color: "bg-emerald-500"
+    },
+    { 
+      icon: Hammer, 
+      name: "Construction", 
+      description: "Building, renovation, structural work",
+      jobs: "350+ jobs",
+      color: "bg-amber-500"
+    },
+    { 
+      icon: Car, 
+      name: "Moving", 
+      description: "Professional moving and relocation",
+      jobs: "250+ jobs",
+      color: "bg-indigo-500"
+    },
+    { 
+      icon: Shield, 
+      name: "Photography", 
+      description: "Event, portrait, commercial photography",
+      jobs: "180+ jobs",
+      color: "bg-pink-500"
+    },
+  ];
+
+  const displayedCategories = showAllServices ? [...categories, ...additionalServices] : categories;
+
   return (
     <section className="py-20 bg-gradient-to-br from-accent/30 to-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-foreground mb-6">
-            Popular Services
+            {showAllServices ? "All Services" : "Popular Services"}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Browse through our most requested services and find the perfect professional for your needs
@@ -74,7 +110,7 @@ const ServiceCategories = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((category, index) => {
+          {displayedCategories.map((category, index) => {
             const IconComponent = category.icon;
             return (
               <div
@@ -102,7 +138,12 @@ const ServiceCategories = () => {
 
                   {/* Button appears on hover */}
                   <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full"
+                      onClick={() => window.location.href = `/service/${category.name.toLowerCase()}`}
+                    >
                       View Services
                     </Button>
                   </div>
@@ -113,8 +154,18 @@ const ServiceCategories = () => {
         </div>
 
         <div className="text-center mt-12">
-          <Button variant="hero" size="lg">
-            View All Services
+          <Button 
+            variant="hero" 
+            size="lg"
+            onClick={() => {
+              if (showAllServices) {
+                window.location.href = '/services';
+              } else {
+                setShowAllServices(true);
+              }
+            }}
+          >
+            {showAllServices ? "Browse All Services" : "View All Services"}
           </Button>
         </div>
       </div>

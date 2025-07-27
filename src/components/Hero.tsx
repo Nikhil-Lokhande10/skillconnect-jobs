@@ -3,8 +3,37 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-workers.jpg";
+import { useState } from "react";
 
 const Hero = () => {
+  const [serviceQuery, setServiceQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+
+  const serviceSuggestions = [
+    "Plumbing", "Electrical", "Carpentry", "Auto Repair", "Painting", 
+    "Cleaning", "Landscaping", "HVAC", "Moving", "Photography"
+  ];
+
+  const locationSuggestions = [
+    "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", 
+    "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX", "San Diego, CA"
+  ];
+
+  const filteredServices = serviceSuggestions.filter(service =>
+    service.toLowerCase().includes(serviceQuery.toLowerCase())
+  );
+
+  const filteredLocations = locationSuggestions.filter(location =>
+    location.toLowerCase().includes(locationQuery.toLowerCase())
+  );
+
+  const handleFindServices = () => {
+    if (serviceQuery && locationQuery) {
+      setShowResults(true);
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center">
       {/* Background Image with Overlay */}
@@ -33,27 +62,123 @@ const Hero = () => {
             </div>
 
             {/* Search Bar */}
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 relative">
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="md:col-span-2 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input 
                     placeholder="What service do you need?"
+                    value={serviceQuery}
+                    onChange={(e) => setServiceQuery(e.target.value)}
                     className="pl-12 h-12 bg-white border-0 text-foreground placeholder:text-gray-500"
                   />
+                  {/* Service Suggestions */}
+                  {serviceQuery && filteredServices.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 z-10 bg-white border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
+                      {filteredServices.map((service, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => setServiceQuery(service)}
+                        >
+                          {service}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <Input 
                     placeholder="Your location"
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
                     className="pl-12 h-12 bg-white border-0 text-foreground placeholder:text-gray-500"
                   />
+                  {/* Location Suggestions */}
+                  {locationQuery && filteredLocations.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 z-10 bg-white border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
+                      {filteredLocations.map((location, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          onClick={() => setLocationQuery(location)}
+                        >
+                          {location}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              <Button variant="secondary" size="lg" className="w-full mt-4">
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="w-full mt-4"
+                onClick={handleFindServices}
+              >
                 <Search className="h-5 w-5 mr-2" />
                 Find Services
               </Button>
+              
+              {/* Search Results Floating Box */}
+              {showResults && (
+                <div className="absolute top-full left-0 right-0 z-20 bg-white border rounded-lg shadow-xl mt-2 p-6">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">
+                    {serviceQuery} services in {locationQuery}
+                  </h3>
+                  {Math.random() > 0.5 ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-foreground">Professional {serviceQuery}</h4>
+                          <p className="text-sm text-muted-foreground">Available in {locationQuery}</p>
+                        </div>
+                        <Button size="sm">Contact</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium text-foreground">Expert {serviceQuery} Services</h4>
+                          <p className="text-sm text-muted-foreground">Serving {locationQuery} area</p>
+                        </div>
+                        <Button size="sm">Contact</Button>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => window.location.href = '/services'}
+                      >
+                        View All Services
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">
+                        Sorry, no {serviceQuery.toLowerCase()} services found in {locationQuery}
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button 
+                          variant="outline"
+                          onClick={() => window.location.href = '/register?tab=customer'}
+                        >
+                          Post a Job Request
+                        </Button>
+                        <Button 
+                          onClick={() => window.location.href = '/services'}
+                        >
+                          Browse All Services
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <button 
+                    className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowResults(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Stats */}
@@ -84,7 +209,12 @@ const Hero = () => {
                 <p className="text-white/80">
                   Post your job and get quotes from verified professionals in your area.
                 </p>
-                <Button variant="secondary" size="lg" className="w-full">
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/register?tab=customer'}
+                >
                   Post a Job
                 </Button>
               </div>
