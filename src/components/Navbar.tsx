@@ -1,13 +1,22 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Briefcase, Moon, Sun } from "lucide-react";
+import { Menu, X, User, Briefcase, Moon, Sun, LogOut } from "lucide-react";
 import { useTheme } from "next-themes";
+import { getCurrentUser, logoutUser, User as AuthUser } from "@/utils/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+  }, [location]);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -19,8 +28,18 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    toast({
+      title: "Logged out successfully",
+      description: "See you next time!",
+    });
+    navigate("/");
+  };
+
   return (
-    <nav className="bg-white shadow-lg border-b border-border sticky top-0 z-50">
+    <nav className="bg-background dark:bg-background shadow-lg border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -59,17 +78,31 @@ const Navbar = () => {
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="default" size="sm">
-                Join SkillConnect
-              </Button>
-            </Link>
+            {currentUser ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-foreground">
+                  Welcome, {currentUser.fullName}
+                </span>
+                <Button variant="ghost" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm">
+                    <User className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button variant="default" size="sm">
+                    Join SkillConnect
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile menu button */}
@@ -111,17 +144,31 @@ const Navbar = () => {
                   {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </Button>
-                <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="ghost" size="sm" className="w-full justify-start">
-                    <User className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/register" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="default" size="sm" className="w-full">
-                    Join SkillConnect
-                  </Button>
-                </Link>
+                {currentUser ? (
+                  <div className="space-y-2">
+                    <div className="px-3 py-2 text-sm font-medium text-foreground">
+                      Welcome, {currentUser.fullName}
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleLogout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <User className="h-4 w-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="default" size="sm" className="w-full">
+                        Join SkillConnect
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

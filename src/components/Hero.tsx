@@ -16,8 +16,11 @@ const Hero = () => {
   ];
 
   const locationSuggestions = [
-    "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", 
-    "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX", "San Diego, CA"
+    "Mumbai, Maharashtra", "Delhi, Delhi", "Bengaluru, Karnataka", "Hyderabad, Telangana",
+    "Ahmedabad, Gujarat", "Chennai, Tamil Nadu", "Kolkata, West Bengal", "Surat, Gujarat",
+    "Pune, Maharashtra", "Jaipur, Rajasthan", "Lucknow, Uttar Pradesh", "Kanpur, Uttar Pradesh",
+    "Nagpur, Maharashtra", "Indore, Madhya Pradesh", "Thane, Maharashtra", "Bhopal, Madhya Pradesh",
+    "Visakhapatnam, Andhra Pradesh", "Pimpri-Chinchwad, Maharashtra", "Patna, Bihar", "Vadodara, Gujarat"
   ];
 
   const filteredServices = serviceSuggestions.filter(service =>
@@ -74,11 +77,11 @@ const Hero = () => {
                   />
                   {/* Service Suggestions */}
                   {serviceQuery && filteredServices.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 z-10 bg-white border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 z-10 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
                       {filteredServices.map((service, index) => (
                         <div
                           key={index}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="px-4 py-3 hover:bg-accent cursor-pointer text-foreground font-medium"
                           onClick={() => setServiceQuery(service)}
                         >
                           {service}
@@ -97,11 +100,11 @@ const Hero = () => {
                   />
                   {/* Location Suggestions */}
                   {locationQuery && filteredLocations.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 z-10 bg-white border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 z-10 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
                       {filteredLocations.map((location, index) => (
                         <div
                           key={index}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                          className="px-4 py-3 hover:bg-accent cursor-pointer text-foreground font-medium"
                           onClick={() => setLocationQuery(location)}
                         >
                           {location}

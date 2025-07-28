@@ -1,16 +1,22 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Briefcase, MapPin, Upload, Mail, Phone, Lock } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
+import BackButton from "@/components/BackButton";
+import { saveUser, savePassword } from "@/utils/auth";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') === 'worker' ? 'worker' : 'customer';
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
   const [userFormData, setUserFormData] = useState({
     fullName: "",
@@ -35,16 +41,89 @@ const Register = () => {
     profilePicture: null as File | null
   });
 
-  const handleUserSubmit = (e: React.FormEvent) => {
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("User registration:", userFormData);
-    // TODO: Implement user registration
+    
+    if (userFormData.password !== userFormData.confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const user = saveUser({
+        fullName: userFormData.fullName,
+        email: userFormData.email,
+        mobile: userFormData.mobile,
+        location: userFormData.location,
+        userType: 'customer'
+      });
+      
+      savePassword(userFormData.email, userFormData.password);
+      
+      toast({
+        title: "Registration successful!",
+        description: "Your customer account has been created successfully.",
+      });
+      
+      navigate("/login");
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleWorkerSubmit = (e: React.FormEvent) => {
+  const handleWorkerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Worker registration:", workerFormData);
-    // TODO: Implement worker registration
+    
+    if (workerFormData.password !== workerFormData.confirmPassword) {
+      toast({
+        title: "Password mismatch",
+        description: "Passwords do not match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const user = saveUser({
+        fullName: workerFormData.fullName,
+        email: workerFormData.email,
+        mobile: workerFormData.mobile,
+        location: workerFormData.location,
+        userType: 'worker',
+        skills: workerFormData.skills,
+        experience: workerFormData.experience,
+        serviceArea: workerFormData.serviceArea
+      });
+      
+      savePassword(workerFormData.email, workerFormData.password);
+      
+      toast({
+        title: "Registration successful!",
+        description: "Your professional account has been created successfully.",
+      });
+      
+      navigate("/login");
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,6 +131,7 @@ const Register = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <BackButton />
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-4">
@@ -177,8 +257,8 @@ const Register = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" variant="hero" size="lg" className="w-full">
-                      Create Customer Account
+                    <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating Account..." : "Create Customer Account"}
                     </Button>
                   </form>
                 </CardContent>
@@ -356,8 +436,8 @@ const Register = () => {
                       </div>
                     </div>
 
-                    <Button type="submit" variant="hero" size="lg" className="w-full">
-                      Create Professional Account
+                    <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating Account..." : "Create Professional Account"}
                     </Button>
                   </form>
                 </CardContent>
