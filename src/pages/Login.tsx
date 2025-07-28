@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Lock, Briefcase } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import BackButton from "@/components/BackButton";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +25,7 @@ const Login = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
+        <BackButton />
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8">
             <div className="w-20 h-20 bg-gradient-hero rounded-2xl flex items-center justify-center mx-auto mb-4">
