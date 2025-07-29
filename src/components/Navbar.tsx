@@ -6,6 +6,69 @@ import { useTheme } from "next-themes";
 import { getCurrentUser, logoutUser, User as AuthUser } from "@/utils/auth";
 import { useToast } from "@/hooks/use-toast";
 
+interface ProfileButtonProps {
+  user: AuthUser;
+  isMobile?: boolean;
+}
+
+const ProfileButton = ({ user, isMobile = false }: ProfileButtonProps) => {
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const savedPicture = localStorage.getItem(`profile_picture_${user.id}`);
+    if (savedPicture) {
+      setProfilePicture(savedPicture);
+    }
+  }, [user.id]);
+
+  const handleProfileClick = () => {
+    navigate("/profile");
+  };
+
+  if (isMobile) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full justify-start"
+        onClick={handleProfileClick}
+      >
+        <div className="flex items-center space-x-3">
+          <div className="w-6 h-6 rounded-full overflow-hidden bg-gradient-hero flex items-center justify-center">
+            {profilePicture ? (
+              <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <User className="h-3 w-3 text-white" />
+            )}
+          </div>
+          <span className="text-sm font-medium">{user.fullName}</span>
+        </div>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={handleProfileClick}
+      className="flex items-center space-x-2 hover:bg-accent"
+    >
+      <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-hero flex items-center justify-center">
+        {profilePicture ? (
+          <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+        ) : (
+          <User className="h-4 w-4 text-white" />
+        )}
+      </div>
+      <span className="text-sm font-medium text-foreground">
+        {user.fullName}
+      </span>
+    </Button>
+  );
+};
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -21,7 +84,7 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services" },
-    { href: "/#how-it-works", label: "How It Works" },
+    { href: "/how-it-works", label: "How It Works" },
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
   ];
@@ -80,9 +143,7 @@ const Navbar = () => {
             </Button>
             {currentUser ? (
               <div className="flex items-center space-x-4">
-                <span className="text-sm font-medium text-foreground">
-                  Welcome, {currentUser.fullName}
-                </span>
+                <ProfileButton user={currentUser} />
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
@@ -146,9 +207,7 @@ const Navbar = () => {
                 </Button>
                 {currentUser ? (
                   <div className="space-y-2">
-                    <div className="px-3 py-2 text-sm font-medium text-foreground">
-                      Welcome, {currentUser.fullName}
-                    </div>
+                    <ProfileButton user={currentUser} isMobile />
                     <Button variant="ghost" size="sm" className="w-full justify-start" onClick={handleLogout}>
                       <LogOut className="h-4 w-4 mr-2" />
                       Logout

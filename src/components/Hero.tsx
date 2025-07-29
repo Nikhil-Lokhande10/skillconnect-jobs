@@ -11,9 +11,10 @@ const Hero = () => {
   const [showResults, setShowResults] = useState(false);
 
   const serviceSuggestions = [
-    "Plumbing", "Electrical", "Carpentry", "Auto Repair", "Painting", 
-    "Cleaning", "Landscaping", "HVAC", "Moving", "Photography"
-  ];
+    "Appliance Repair", "Auto Repair", "Carpentry", "Cleaning", "Construction", "Electrical", 
+    "HVAC", "Landscaping", "Moving", "Painting", "Pest Control", "Photography", 
+    "Plumbing", "Security", "Tutoring", "Web Design"
+  ].sort();
 
   const locationSuggestions = [
     "Mumbai, Maharashtra", "Delhi, Delhi", "Bengaluru, Karnataka", "Hyderabad, Telangana",
@@ -69,11 +70,11 @@ const Hero = () => {
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="md:col-span-2 relative">
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input 
+                   <Input 
                     placeholder="What service do you need?"
                     value={serviceQuery}
                     onChange={(e) => setServiceQuery(e.target.value)}
-                    className="pl-12 h-12 bg-white border-0 text-foreground placeholder:text-gray-500"
+                    className="pl-12 h-12 bg-white dark:bg-background border-0 text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
                   />
                   {/* Service Suggestions */}
                   {serviceQuery && filteredServices.length > 0 && (
@@ -92,11 +93,11 @@ const Hero = () => {
                 </div>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                  <Input 
+                   <Input 
                     placeholder="Your location"
                     value={locationQuery}
                     onChange={(e) => setLocationQuery(e.target.value)}
-                    className="pl-12 h-12 bg-white border-0 text-foreground placeholder:text-gray-500"
+                    className="pl-12 h-12 bg-white dark:bg-background border-0 text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
                   />
                   {/* Location Suggestions */}
                   {locationQuery && filteredLocations.length > 0 && (

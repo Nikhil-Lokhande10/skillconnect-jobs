@@ -10,6 +10,8 @@ export interface User {
   skills?: string;
   experience?: string;
   serviceArea?: string;
+  profilePicture?: string;
+  idProof?: string;
   createdAt: string;
 }
 

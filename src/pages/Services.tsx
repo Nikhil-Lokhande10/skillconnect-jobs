@@ -43,24 +43,24 @@ const Services = () => {
           </p>
           
           {/* Search Bar */}
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl p-6 shadow-lg border">
+          <div className="max-w-4xl mx-auto bg-card rounded-2xl p-6 shadow-lg border">
             <div className="grid md:grid-cols-3 gap-4">
               <div className="md:col-span-2 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
                   placeholder="Search for services..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 h-12"
+                  className="pl-12 h-12 bg-background text-foreground"
                 />
               </div>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input 
                   placeholder="Enter location"
                   value={locationQuery}
                   onChange={(e) => setLocationQuery(e.target.value)}
-                  className="pl-12 h-12"
+                  className="pl-12 h-12 bg-background text-foreground"
                 />
               </div>
             </div>
@@ -76,11 +76,11 @@ const Services = () => {
               const IconComponent = service.icon;
               return (
                 <div key={index} className="group relative">
-                  <div className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-lg transition-all duration-300 transform group-hover:-translate-y-1">
+                  <div className="bg-card rounded-2xl p-6 shadow-sm border hover:shadow-lg transition-all duration-300 transform group-hover:-translate-y-1">
                     <div className={`w-16 h-16 rounded-2xl ${service.color} flex items-center justify-center mb-4`}>
                       <IconComponent className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">{service.name}</h3>
+                    <h3 className="text-xl font-semibold text-card-foreground mb-2">{service.name}</h3>
                     <p className="text-muted-foreground mb-4">{service.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">{service.jobs} jobs available</span>

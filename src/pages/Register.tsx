@@ -70,7 +70,15 @@ const Register = () => {
         description: "Your customer account has been created successfully.",
       });
       
-      navigate("/login");
+      // Auto-login after successful registration
+      localStorage.setItem('skillconnect_auth', JSON.stringify(user));
+      
+      toast({
+        title: "Registration successful!",
+        description: "Welcome to SkillConnect! You're now logged in.",
+      });
+      
+      navigate("/");
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -107,6 +115,25 @@ const Register = () => {
         serviceArea: workerFormData.serviceArea
       });
       
+      // Save profile picture and ID proof
+      if (workerFormData.profilePicture) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64String = e.target?.result as string;
+          localStorage.setItem(`profile_picture_${user.id}`, base64String);
+        };
+        reader.readAsDataURL(workerFormData.profilePicture);
+      }
+      
+      if (workerFormData.idProof) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64String = e.target?.result as string;
+          localStorage.setItem(`id_proof_${user.id}`, base64String);
+        };
+        reader.readAsDataURL(workerFormData.idProof);
+      }
+      
       savePassword(workerFormData.email, workerFormData.password);
       
       toast({
@@ -114,7 +141,15 @@ const Register = () => {
         description: "Your professional account has been created successfully.",
       });
       
-      navigate("/login");
+      // Auto-login after successful registration
+      localStorage.setItem('skillconnect_auth', JSON.stringify(user));
+      
+      toast({
+        title: "Registration successful!",
+        description: "Welcome to SkillConnect! You're now logged in.",
+      });
+      
+      navigate("/");
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -384,18 +419,34 @@ const Register = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="worker-id">ID Proof</Label>
-                          <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                          <label className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-accent/50 transition-colors block">
                             <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">Click to upload ID proof</p>
-                          </div>
+                            <p className="text-sm text-muted-foreground">
+                              {workerFormData.idProof ? workerFormData.idProof.name : "Click to upload ID proof"}
+                            </p>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={(e) => setWorkerFormData({...workerFormData, idProof: e.target.files?.[0] || null})}
+                              className="hidden"
+                            />
+                          </label>
                         </div>
 
                         <div className="space-y-2">
                           <Label htmlFor="worker-photo">Profile Picture</Label>
-                          <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                          <label className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:bg-accent/50 transition-colors block">
                             <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                            <p className="text-sm text-muted-foreground">Click to upload photo</p>
-                          </div>
+                            <p className="text-sm text-muted-foreground">
+                              {workerFormData.profilePicture ? workerFormData.profilePicture.name : "Click to upload photo"}
+                            </p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => setWorkerFormData({...workerFormData, profilePicture: e.target.files?.[0] || null})}
+                              className="hidden"
+                            />
+                          </label>
                         </div>
                       </div>
                     </div>
