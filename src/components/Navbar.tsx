@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Briefcase, Moon, Sun, LogOut } from "lucide-react";
+import { Menu, X, User, Briefcase, Moon, Sun, LogOut, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
 import { getCurrentUser, logoutUser, User as AuthUser } from "@/utils/auth";
 import { useToast } from "@/hooks/use-toast";
+import NotificationCenter from "@/components/NotificationCenter";
 
 interface ProfileButtonProps {
   user: AuthUser;
@@ -72,6 +73,7 @@ const ProfileButton = ({ user, isMobile = false }: ProfileButtonProps) => {
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
@@ -141,6 +143,23 @@ const Navbar = () => {
             >
               {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
+            {currentUser && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative"
+                >
+                  <Bell className="h-4 w-4" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                </Button>
+                <NotificationCenter 
+                  isOpen={showNotifications} 
+                  onClose={() => setShowNotifications(false)} 
+                />
+              </div>
+            )}
             {currentUser ? (
               <div className="flex items-center space-x-4">
                 <ProfileButton user={currentUser} />
@@ -205,6 +224,17 @@ const Navbar = () => {
                   {theme === "dark" ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
                   {theme === "dark" ? "Light Mode" : "Dark Mode"}
                 </Button>
+                {currentUser && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start"
+                    onClick={() => setShowNotifications(!showNotifications)}
+                  >
+                    <Bell className="h-4 w-4 mr-2" />
+                    Notifications
+                  </Button>
+                )}
                 {currentUser ? (
                   <div className="space-y-2">
                     <ProfileButton user={currentUser} isMobile />

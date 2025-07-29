@@ -1,14 +1,23 @@
 import { Search, MapPin, Briefcase } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import heroImage from "@/assets/hero-workers.jpg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getCurrentUser, User as AuthUser } from "@/utils/auth";
 
 const Hero = () => {
   const [serviceQuery, setServiceQuery] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [showServiceSuggestions, setShowServiceSuggestions] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+  }, []);
 
   const serviceSuggestions = [
     "Appliance Repair", "Auto Repair", "Carpentry", "Cleaning", "Construction", "Electrical", 
@@ -33,8 +42,24 @@ const Hero = () => {
   );
 
   const handleFindServices = () => {
-    if (serviceQuery && locationQuery) {
+    if (serviceQuery && locationQuery && !showServiceSuggestions && !showLocationSuggestions) {
       setShowResults(true);
+    }
+  };
+
+  const handlePostJob = () => {
+    if (currentUser) {
+      navigate("/post-job");
+    } else {
+      navigate("/register?tab=customer");
+    }
+  };
+
+  const handleJoinAsWorker = () => {
+    if (currentUser) {
+      navigate("/profile");
+    } else {
+      navigate("/register?tab=worker");
     }
   };
 
@@ -73,17 +98,24 @@ const Hero = () => {
                    <Input 
                     placeholder="What service do you need?"
                     value={serviceQuery}
-                    onChange={(e) => setServiceQuery(e.target.value)}
+                    onChange={(e) => {
+                      setServiceQuery(e.target.value);
+                      setShowServiceSuggestions(true);
+                    }}
+                    onFocus={() => serviceQuery && setShowServiceSuggestions(true)}
                     className="pl-12 h-12 bg-white dark:bg-background border-0 text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
                   />
                   {/* Service Suggestions */}
-                  {serviceQuery && filteredServices.length > 0 && (
+                  {serviceQuery && filteredServices.length > 0 && showServiceSuggestions && (
                     <div className="absolute top-full left-0 right-0 z-10 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
                       {filteredServices.map((service, index) => (
                         <div
                           key={index}
                           className="px-4 py-3 hover:bg-accent cursor-pointer text-foreground font-medium"
-                          onClick={() => setServiceQuery(service)}
+                          onClick={() => {
+                            setServiceQuery(service);
+                            setShowServiceSuggestions(false);
+                          }}
                         >
                           {service}
                         </div>
@@ -96,17 +128,24 @@ const Hero = () => {
                    <Input 
                     placeholder="Your location"
                     value={locationQuery}
-                    onChange={(e) => setLocationQuery(e.target.value)}
+                    onChange={(e) => {
+                      setLocationQuery(e.target.value);
+                      setShowLocationSuggestions(true);
+                    }}
+                    onFocus={() => locationQuery && setShowLocationSuggestions(true)}
                     className="pl-12 h-12 bg-white dark:bg-background border-0 text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
                   />
                   {/* Location Suggestions */}
-                  {locationQuery && filteredLocations.length > 0 && (
+                  {locationQuery && filteredLocations.length > 0 && showLocationSuggestions && (
                     <div className="absolute top-full left-0 right-0 z-10 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-40 overflow-y-auto">
                       {filteredLocations.map((location, index) => (
                         <div
                           key={index}
                           className="px-4 py-3 hover:bg-accent cursor-pointer text-foreground font-medium"
-                          onClick={() => setLocationQuery(location)}
+                          onClick={() => {
+                            setLocationQuery(location);
+                            setShowLocationSuggestions(false);
+                          }}
                         >
                           {location}
                         </div>
@@ -120,6 +159,7 @@ const Hero = () => {
                 size="lg" 
                 className="w-full mt-4"
                 onClick={handleFindServices}
+                disabled={!serviceQuery || !locationQuery || showServiceSuggestions || showLocationSuggestions}
               >
                 <Search className="h-5 w-5 mr-2" />
                 Find Services
@@ -163,7 +203,7 @@ const Hero = () => {
                       <div className="flex flex-col sm:flex-row gap-2">
                         <Button 
                           variant="outline"
-                          onClick={() => window.location.href = '/register?tab=customer'}
+                          onClick={handlePostJob}
                         >
                           Post a Job Request
                         </Button>
@@ -204,42 +244,70 @@ const Hero = () => {
 
           {/* Right Column - Call to Action Cards */}
           <div className="space-y-6">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
-                  <Briefcase className="h-8 w-8 text-white" />
+            {!currentUser && (
+              <>
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
+                      <Briefcase className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Need a Service?</h3>
+                    <p className="text-white/80">
+                      Post your job and get quotes from verified professionals in your area.
+                    </p>
+                    <Button 
+                      variant="secondary" 
+                      size="lg" 
+                      className="w-full"
+                      onClick={handlePostJob}
+                    >
+                      Post Your First Job
+                    </Button>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white">Need a Service?</h3>
-                <p className="text-white/80">
-                  Post your job and get quotes from verified professionals in your area.
-                </p>
-                <Button 
-                  variant="secondary" 
-                  size="lg" 
-                  className="w-full"
-                  onClick={() => window.location.href = '/register?tab=customer'}
-                >
-                  Post a Job
-                </Button>
-              </div>
-            </div>
 
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto">
-                  <Briefcase className="h-8 w-8 text-white" />
+                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto">
+                      <Briefcase className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white">Are You a Professional?</h3>
+                    <p className="text-white/80">
+                      Join our platform and connect with customers who need your skills.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="lg" 
+                      className="w-full border-white text-white hover:bg-white hover:text-primary"
+                      onClick={handleJoinAsWorker}
+                    >
+                      Join as Professional
+                    </Button>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-white">Are You a Professional?</h3>
-                <p className="text-white/80">
-                  Join our platform and connect with customers who need your skills.
-                </p>
-                <Link to="/register?tab=worker">
-                  <Button variant="outline" size="lg" className="w-full border-white text-white hover:bg-white hover:text-primary">
-                    Join as Worker
+              </>
+            )}
+            {currentUser && (
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+                <div className="text-center space-y-4">
+                  <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto">
+                    <Briefcase className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Welcome Back!</h3>
+                  <p className="text-white/80">
+                    {currentUser.userType === 'customer' ? 'Ready to post a new job?' : 'Check out available jobs in your area.'}
+                  </p>
+                  <Button 
+                    variant="secondary" 
+                    size="lg" 
+                    className="w-full"
+                    onClick={() => navigate(currentUser.userType === 'customer' ? '/post-job' : '/manage-services')}
+                  >
+                    {currentUser.userType === 'customer' ? 'Post a Job' : 'Find Jobs'}
                   </Button>
-                </Link>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

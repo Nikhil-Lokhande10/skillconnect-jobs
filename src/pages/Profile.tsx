@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { getCurrentUser, User as AuthUser } from "@/utils/auth";
 import { Upload, User, Mail, Phone, MapPin, Briefcase, Clock, History, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import EditProfile from "@/components/EditProfile";
 
 const Profile = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -178,9 +179,14 @@ const Profile = () => {
                   )}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-muted-foreground">Edit functionality coming soon...</p>
-                </div>
+                <EditProfile 
+                  user={user} 
+                  onSave={(updatedUser) => {
+                    setUser(updatedUser);
+                    setIsEditing(false);
+                  }}
+                  onCancel={() => setIsEditing(false)}
+                />
               )}
             </CardContent>
           </Card>

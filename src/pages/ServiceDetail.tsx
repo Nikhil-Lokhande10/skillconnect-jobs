@@ -104,7 +104,7 @@ const ServiceDetail = () => {
           <div className="grid lg:grid-cols-2 gap-12">
             {/* Service Information */}
             <div className="space-y-8">
-              <div className="bg-white rounded-2xl p-8 shadow-lg border">
+              <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
                 <h2 className="text-2xl font-bold text-foreground mb-6">What We Offer</h2>
                 <div className="grid gap-4">
                   {service.services.map((item, index) => (
@@ -116,7 +116,7 @@ const ServiceDetail = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-8 shadow-lg border">
+              <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Pricing & Response</h2>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -130,7 +130,7 @@ const ServiceDetail = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-8 shadow-lg border">
+              <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
                 <h2 className="text-2xl font-bold text-foreground mb-6">Why Choose Our Professionals</h2>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
@@ -150,7 +150,7 @@ const ServiceDetail = () => {
             </div>
 
             {/* Job Request Form */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border">
+            <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
               <h2 className="text-2xl font-bold text-foreground mb-6">Request This Service</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-4">
@@ -231,7 +231,7 @@ const ServiceDetail = () => {
                     name="urgency"
                     value={jobRequest.urgency}
                     onChange={handleChange}
-                    className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full p-3 border border-border rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="normal">Normal (within a week)</option>
                     <option value="urgent">Urgent (within 2-3 days)</option>

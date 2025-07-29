@@ -1,6 +1,32 @@
 import { Search, UserCheck, Calendar, Star } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser, User as AuthUser } from "@/utils/auth";
 
 const HowItWorks = () => {
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+  }, []);
+
+  const handlePostJob = () => {
+    if (currentUser) {
+      navigate("/post-job");
+    } else {
+      navigate("/register?tab=customer");
+    }
+  };
+
+  const handleJoinAsWorker = () => {
+    if (currentUser) {
+      navigate("/profile");
+    } else {
+      navigate("/register?tab=worker");
+    }
+  };
+
   const steps = [
     {
       icon: Search,
@@ -85,18 +111,30 @@ const HowItWorks = () => {
             Ready to get started?
           </h3>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transform hover:-translate-y-0.5 transition-all duration-300"
-              onClick={() => window.location.href = '/register?tab=customer'}
-            >
-              Post Your First Job
-            </button>
-            <button 
-              className="border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transition-all duration-300"
-              onClick={() => window.location.href = '/register?tab=worker'}
-            >
-              Join as Professional
-            </button>
+            {!currentUser && (
+              <>
+                <button 
+                  className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transform hover:-translate-y-0.5 transition-all duration-300"
+                  onClick={handlePostJob}
+                >
+                  Post Your First Job
+                </button>
+                <button 
+                  className="border-2 border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transition-all duration-300"
+                  onClick={handleJoinAsWorker}
+                >
+                  Join as Professional
+                </button>
+              </>
+            )}
+            {currentUser && (
+              <button 
+                className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-4 rounded-xl font-medium shadow-lg hover:shadow-primary transform hover:-translate-y-0.5 transition-all duration-300"
+                onClick={() => navigate(currentUser.userType === 'customer' ? '/post-job' : '/manage-services')}
+              >
+                {currentUser.userType === 'customer' ? 'Post a Job' : 'Find Jobs'}
+              </button>
+            )}
           </div>
         </div>
       </div>
