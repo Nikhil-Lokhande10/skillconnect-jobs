@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { getCurrentUser, User as AuthUser } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { Search, MapPin, Clock, Users, Filter, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,12 +15,12 @@ interface JobListing {
   title: string;
   description: string;
   location: string;
-  category: string;
-  budget: string;
-  urgency: 'normal' | 'urgent' | 'emergency';
-  postedDate: string;
-  customerName: string;
-  status: 'open' | 'in-progress' | 'completed';
+  category: string | null;
+  budget: number | null;
+  urgency: 'low' | 'normal' | 'high' | 'urgent' | null;
+  created_at: string;
+  customerName: string | null;
+  status: 'open' | 'assigned' | 'completed' | 'cancelled';
 }
 
 const ManageServices = () => {
@@ -42,47 +43,31 @@ const ManageServices = () => {
     }
     setUser(currentUser);
     
-    // Mock job listings based on user's skills
-    const mockJobs: JobListing[] = [
-      {
-        id: "job_1",
-        title: "Kitchen Sink Repair",
-        description: "Need urgent plumbing repair for a leaking kitchen sink. Located on second floor.",
-        location: "Mumbai, Maharashtra",
-        category: "plumbing",
-        budget: "₹2,000 - ₹5,000",
-        urgency: "urgent",
-        postedDate: "2 hours ago",
-        customerName: "Rajesh Kumar",
-        status: "open"
-      },
-      {
-        id: "job_2",
-        title: "Electrical Outlet Installation",
-        description: "Install 3 new electrical outlets in home office. All materials provided.",
-        location: "Delhi, Delhi",
-        category: "electrical",
-        budget: "₹3,000 - ₹6,000",
-        urgency: "normal",
-        postedDate: "1 day ago",
-        customerName: "Priya Sharma",
-        status: "open"
-      },
-      {
-        id: "job_3",
-        title: "Custom Bookshelf",
-        description: "Build a custom wooden bookshelf for living room. Measurements provided.",
-        location: "Pune, Maharashtra",
-        category: "carpentry",
-        budget: "₹8,000 - ₹15,000",
-        urgency: "normal",
-        postedDate: "3 days ago",
-        customerName: "Amit Patel",
-        status: "open"
+    // Fetch open jobs from Supabase with poster info
+    const fetchJobs = async () => {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('id,title,description,location,category,budget,urgency,created_at,status, profiles:posted_by(full_name)')
+        .eq('status', 'open')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        const mapped: JobListing[] = (data as Array<{ id: string; title: string; description: string; location: string; category: string | null; budget: number | null; urgency: JobListing['urgency']; created_at: string; status: JobListing['status']; profiles?: { full_name?: string } }>)
+          .map((j) => ({
+          id: j.id,
+          title: j.title,
+          description: j.description,
+          location: j.location,
+          category: j.category,
+          budget: j.budget,
+          urgency: j.urgency,
+          created_at: j.created_at,
+          customerName: j.profiles?.full_name ?? null,
+          status: j.status
+        }));
+        setJobs(mapped);
       }
-    ];
-    
-    setJobs(mockJobs);
+    };
+    fetchJobs();
   }, [navigate]);
 
   const filteredJobs = jobs.filter(job => {
@@ -93,17 +78,28 @@ const ManageServices = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleContactCustomer = (job: JobListing) => {
-    toast({
-      title: "Contact Request Sent",
-      description: `Your interest in "${job.title}" has been sent to ${job.customerName}.`,
+  const handleContactCustomer = async (job: JobListing) => {
+    if (!user) return;
+    const { error } = await supabase.from('applications').insert({
+      job_id: job.id,
+      worker_id: user.id,
+      cover_letter: `Interested in ${job.title}`
     });
+    if (error) {
+      toast({ title: 'Failed to send interest', description: error.message, variant: 'destructive' });
+    } else {
+      toast({
+        title: "Interest Sent",
+        description: `Your interest in "${job.title}" has been sent${job.customerName ? ` to ${job.customerName}` : ''}.`,
+      });
+    }
   };
 
-  const urgencyColors = {
+  const urgencyColors: Record<string, string> = {
+    low: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
     normal: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-    urgent: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
-    emergency: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+    high: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300",
+    urgent: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
   };
 
   if (!user) return null;
@@ -183,7 +179,7 @@ const ManageServices = () => {
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
-                            {job.postedDate}
+                            {new Date(job.created_at).toLocaleString()}
                           </div>
                         </div>
                       </div>
@@ -200,7 +196,7 @@ const ManageServices = () => {
                     <div className="flex justify-between items-center">
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">Budget</p>
-                        <p className="font-semibold text-foreground">{job.budget}</p>
+                        <p className="font-semibold text-foreground">{job.budget != null ? `₹${job.budget}` : '—'}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm text-muted-foreground">Posted by</p>

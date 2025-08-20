@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Briefcase, Moon, Sun, LogOut, Bell } from "lucide-react";
 import { useTheme } from "next-themes";
-import { getCurrentUser, logoutUser, User as AuthUser } from "@/utils/auth";
+import { getCurrentUser, logoutUser, User as AuthUser, AUTH_STORAGE_KEY } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 import NotificationCenter from "@/components/NotificationCenter";
 
@@ -80,7 +81,33 @@ const Navbar = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load from local cache first
     setCurrentUser(getCurrentUser());
+    // Then sync with Supabase profile to ensure correct role/user data
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (data?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, full_name, email, phone, location')
+          .eq('user_id', data.user.id)
+          .single();
+        if (profile) {
+          const cached = getCurrentUser();
+          if (cached) {
+            const synced: AuthUser = {
+              ...cached,
+              userType: profile.role === 'worker' ? 'worker' : 'customer',
+              fullName: profile.full_name ?? cached.fullName,
+              email: profile.email ?? cached.email,
+              mobile: profile.phone ?? cached.mobile,
+              location: profile.location ?? cached.location,
+            };
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(synced));
+            setCurrentUser(synced);
+          }
+        }
+      }
+    });
   }, [location]);
 
   const navLinks = [
@@ -93,8 +120,8 @@ const Navbar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await logoutUser();
     setCurrentUser(null);
     toast({
       title: "Logged out successfully",
@@ -110,9 +137,11 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-hero rounded-xl flex items-center justify-center">
-                <Briefcase className="h-6 w-6 text-white" />
-              </div>
+              <img
+                src="favicon.ico"
+                alt="SkillConnect Logo"
+                className="w-10 h-10 rounded-xl object-cover"
+              />
               <span className="text-2xl font-bold text-primary">SkillConnect</span>
             </Link>
           </div>

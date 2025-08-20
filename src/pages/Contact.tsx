@@ -47,15 +47,15 @@ const Contact = () => {
         </div>
       </section>
 
-      <div className="px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
+      <div className="px-4 sm:px-6 lg:px-8 pb-2">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Contact Form */}
-          <div className="bg-white rounded-2xl p-8 shadow-lg border">
-            <h2 className="text-2xl font-bold text-foreground mb-6">Send us a Message</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="bg-card rounded-2xl p-6 shadow-sm border text-card-foreground lg:col-span-2 flex flex-col justify-center">
+            <h2 className="text-2xl font-bold mb-0">Send us a Message</h2>
+            <form onSubmit={handleSubmit} className="space-y-4 mt-2">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-sm font-medium mb-2 text-card-foreground">
                     Full Name
                   </label>
                   <Input
@@ -67,7 +67,7 @@ const Contact = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-sm font-medium mb-2 text-card-foreground">
                     Email Address
                   </label>
                   <Input
@@ -81,7 +81,7 @@ const Contact = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium mb-2 text-card-foreground">
                   Subject
                 </label>
                 <Input
@@ -93,7 +93,7 @@ const Contact = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
+                <label className="block text-sm font-medium mb-2 text-card-foreground">
                   Message
                 </label>
                 <Textarea
@@ -110,18 +110,17 @@ const Contact = () => {
               </Button>
             </form>
           </div>
-
-          {/* Contact Information */}
-          <div className="space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border">
-              <h2 className="text-2xl font-bold text-foreground mb-6">Get in Touch</h2>
+          {/* Contact Information & FAQ */}
+          <div className="flex flex-col gap-6">
+            <div className="bg-card rounded-2xl p-6 shadow-sm border text-card-foreground">
+              <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
                   <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center">
                     <Mail className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Email</h3>
+                    <h3 className="font-semibold">Email</h3>
                     <p className="text-muted-foreground">support@skillconnect.com</p>
                     <p className="text-sm text-muted-foreground">We'll respond within 24 hours</p>
                   </div>
@@ -131,7 +130,7 @@ const Contact = () => {
                     <Phone className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Phone</h3>
+                    <h3 className="font-semibold">Phone</h3>
                     <p className="text-muted-foreground">1-800-SKILL-00</p>
                     <p className="text-sm text-muted-foreground">Mon-Fri, 9AM-6PM EST</p>
                   </div>
@@ -141,7 +140,7 @@ const Contact = () => {
                     <MapPin className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Address</h3>
+                    <h3 className="font-semibold">Address</h3>
                     <p className="text-muted-foreground">123 Business Street<br />Suite 100<br />New York, NY 10001</p>
                   </div>
                 </div>
@@ -150,26 +149,25 @@ const Contact = () => {
                     <Clock className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Business Hours</h3>
+                    <h3 className="font-semibold">Business Hours</h3>
                     <p className="text-muted-foreground">Monday - Friday: 9:00 AM - 6:00 PM<br />Saturday: 10:00 AM - 4:00 PM<br />Sunday: Closed</p>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-lg border">
-              <h3 className="text-xl font-bold text-foreground mb-4">Frequently Asked Questions</h3>
+            <div className="bg-card rounded-2xl p-6 shadow-sm border text-card-foreground">
+              <h3 className="text-xl font-bold mb-4">Frequently Asked Questions</h3>
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-semibold text-foreground">How do I post a job?</h4>
+                  <h4 className="font-semibold">How do I post a job?</h4>
                   <p className="text-sm text-muted-foreground">Sign up for a customer account and click "Post a Job" to get started.</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">How do I join as a professional?</h4>
+                  <h4 className="font-semibold">How do I join as a professional?</h4>
                   <p className="text-sm text-muted-foreground">Register as a worker and complete your profile to start receiving job opportunities.</p>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground">Is there a fee to use SkillConnect?</h4>
+                  <h4 className="font-semibold">Is there a fee to use SkillConnect?</h4>
                   <p className="text-sm text-muted-foreground">Registration is free. We only charge a small service fee when jobs are completed.</p>
                 </div>
               </div>

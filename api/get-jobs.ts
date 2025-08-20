@@ -1,0 +1,1 @@
+// This file is no longer needed. All job data should come directly from Supabase client in the frontend.

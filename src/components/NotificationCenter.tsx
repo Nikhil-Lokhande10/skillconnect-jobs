@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, X, User, Briefcase, Clock } from "lucide-react";
 import { getCurrentUser, User as AuthUser } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface Notification {
@@ -31,64 +32,43 @@ const NotificationCenter = ({ isOpen, onClose }: NotificationCenterProps) => {
     setUser(currentUser);
     
     if (currentUser) {
-      // Mock notifications based on user type
-      const mockNotifications: Notification[] = currentUser.userType === 'worker' 
-        ? [
-            {
-              id: "notif_1",
-              type: "job_posted",
-              title: "New Plumbing Job Posted",
-              message: "A new plumbing job in Mumbai matches your skills",
-              timestamp: "2 minutes ago",
-              read: false,
-              actionUrl: "/manage-services"
-            },
-            {
-              id: "notif_2",
-              type: "job_posted",
-              title: "Urgent Electrical Work",
-              message: "Emergency electrical repair needed in your area",
-              timestamp: "1 hour ago",
-              read: false,
-              actionUrl: "/manage-services"
-            },
-            {
-              id: "notif_3",
-              type: "message",
-              title: "Customer Message",
-              message: "Rajesh Kumar sent you a message about the kitchen sink repair",
-              timestamp: "3 hours ago",
-              read: true
-            }
-          ]
-        : [
-            {
-              id: "notif_1",
-              type: "worker_interested",
-              title: "Worker Interested",
-              message: "Ram Sharma is interested in your plumbing job",
-              timestamp: "30 minutes ago",
-              read: false
-            },
-            {
-              id: "notif_2",
-              type: "worker_interested",
-              title: "3 New Proposals",
-              message: "You received 3 new proposals for your electrical work",
-              timestamp: "2 hours ago",
-              read: false
-            },
-            {
-              id: "notif_3",
-              type: "job_completed",
-              title: "Job Completed",
-              message: "Your carpentry project has been marked as completed",
-              timestamp: "1 day ago",
-              read: true
-            }
-          ];
-      
-      setNotifications(mockNotifications);
+      // Minimal live notifications: new open jobs, or applications on your jobs
+      const fetchNotifications = async () => {
+        if (currentUser.userType === 'worker') {
+          const { data } = await supabase
+            .from('jobs')
+            .select('id,title,created_at')
+            .eq('status', 'open')
+            .order('created_at', { ascending: false })
+            .limit(5);
+          const notifs: Notification[] = (data || []).map((j: { id: string; title: string; created_at: string }) => ({
+            id: j.id,
+            type: 'job_posted',
+            title: 'New Job Posted',
+            message: j.title,
+            timestamp: new Date(j.created_at).toLocaleString(),
+            read: false,
+            actionUrl: '/manage-services'
+          }));
+          setNotifications(notifs);
+        } else {
+          const { data } = await supabase
+            .from('applications')
+            .select('id, created_at, jobs:job_id(title)')
+            .order('created_at', { ascending: false })
+            .limit(5);
+          const notifs: Notification[] = (data as Array<{ id: string; created_at: string; jobs?: { title?: string } }> | null || []).map((a) => ({
+            id: a.id,
+            type: 'worker_interested',
+            title: 'New Application',
+            message: a.jobs?.title ?? 'Your job received a new application',
+            timestamp: new Date(a.created_at).toLocaleString(),
+            read: false
+          }));
+          setNotifications(notifs);
+        }
+      };
+      fetchNotifications();
     }
   }, []);
 

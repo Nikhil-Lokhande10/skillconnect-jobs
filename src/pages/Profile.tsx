@@ -9,6 +9,7 @@ import { getCurrentUser, User as AuthUser } from "@/utils/auth";
 import { Upload, User, Mail, Phone, MapPin, Briefcase, Clock, History, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import EditProfile from "@/components/EditProfile";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -224,6 +225,14 @@ const Profile = () => {
                 <Briefcase className="h-5 w-5 mr-2" />
                 Manage Services
               </Button>
+            )}
+
+            {user.userType === 'customer' && (
+              <Link to="/applications" className="flex-1">
+                <Button variant="outline" className="w-full" size="lg">
+                  Review Applications
+                </Button>
+              </Link>
             )}
           </div>
         </div>

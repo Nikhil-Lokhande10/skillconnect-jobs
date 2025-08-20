@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User as AuthUser } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 import { Save, X } from "lucide-react";
 
@@ -33,22 +34,30 @@ const EditProfile = ({ user, onSave, onCancel }: EditProfileProps) => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Update Supabase profile
+    const { error } = await supabase.from('profiles').update({
+      full_name: formData.fullName,
+      email: formData.email,
+      phone: formData.mobile,
+      location: formData.location,
+      skills: formData.skills ? formData.skills.split(',').map(s => s.trim()) : [],
+      experience_years: formData.experience ? parseInt(formData.experience, 10) : 0,
+      availability: { serviceArea: formData.serviceArea }
+    }).eq('user_id', user.id);
+
+    if (error) {
+      toast({ title: 'Failed to update profile', description: error.message, variant: 'destructive' });
+      return;
+    }
+
     const updatedUser: AuthUser = {
       ...user,
       ...formData
     };
-
-    // Update user in localStorage
-    const users = JSON.parse(localStorage.getItem('skillconnect_users') || '[]');
-    const userIndex = users.findIndex((u: AuthUser) => u.id === user.id);
-    if (userIndex !== -1) {
-      users[userIndex] = updatedUser;
-      localStorage.setItem('skillconnect_users', JSON.stringify(users));
-      localStorage.setItem('skillconnect_auth', JSON.stringify(updatedUser));
-    }
+    localStorage.setItem('skillconnect_auth', JSON.stringify(updatedUser));
 
     onSave(updatedUser);
     toast({

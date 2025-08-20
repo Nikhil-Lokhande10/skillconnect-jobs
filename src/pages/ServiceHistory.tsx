@@ -5,6 +5,7 @@ import BackButton from "@/components/BackButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCurrentUser, User as AuthUser } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { Calendar, MapPin, User, Star, DollarSign, Clock } from "lucide-react";
 
 interface ServiceRecord {
@@ -13,7 +14,7 @@ interface ServiceRecord {
   description: string;
   price: number;
   date: string;
-  status: 'completed' | 'pending' | 'cancelled';
+  status: 'completed' | 'pending' | 'cancelled' | 'open' | 'assigned';
   rating?: number;
   customerName?: string;
   workerName?: string;
@@ -33,84 +34,51 @@ const ServiceHistory = () => {
     }
     setUser(currentUser);
     
-    // Load service history from localStorage
-    const history = JSON.parse(localStorage.getItem(`service_history_${currentUser.id}`) || '[]');
-    
-    // If no history exists, create some sample data
-    if (history.length === 0) {
-      const sampleHistory: ServiceRecord[] = currentUser.userType === 'customer' ? [
-        {
-          id: '1',
-          serviceName: 'Plumbing Repair',
-          description: 'Kitchen sink pipe repair',
-          price: 1500,
-          date: '2024-01-15',
-          status: 'completed' as const,
-          rating: 5,
-          workerName: 'Raj Kumar',
-          location: 'Mumbai, Maharashtra'
-        },
-        {
-          id: '2',
-          serviceName: 'Electrical Work',
-          description: 'Ceiling fan installation',
-          price: 800,
-          date: '2024-01-20',
-          status: 'completed' as const,
-          rating: 4,
-          workerName: 'Amit Sharma',
-          location: 'Mumbai, Maharashtra'
-        },
-        {
-          id: '3',
-          serviceName: 'House Cleaning',
-          description: 'Deep cleaning service',
-          price: 2000,
-          date: '2024-01-25',
-          status: 'pending' as const,
-          workerName: 'Priya Services',
-          location: 'Mumbai, Maharashtra'
+    const loadHistory = async () => {
+      if (currentUser.userType === 'customer') {
+        // Jobs posted by the customer
+        const { data, error } = await supabase
+          .from('jobs')
+          .select('id, title, description, location, budget, status, created_at, assigned_to, assigned_profile:assigned_to(full_name)')
+          .eq('posted_by', currentUser.id)
+          .order('created_at', { ascending: false });
+        if (!error && data) {
+          const mapped: ServiceRecord[] = (data as Array<{ id: string; title: string; description: string; location: string; budget: number | null; status: ServiceRecord['status']; created_at: string; assigned_profile?: { full_name?: string } }>).map(j => ({
+            id: j.id,
+            serviceName: j.title,
+            description: j.description,
+            price: j.budget ?? 0,
+            date: j.created_at,
+            status: j.status,
+            workerName: j.assigned_profile?.full_name ?? undefined,
+            location: j.location
+          }));
+          setServiceHistory(mapped);
         }
-      ] : [
-        {
-          id: '1',
-          serviceName: 'Plumbing Service',
-          description: 'Bathroom pipe repair',
-          price: 1200,
-          date: '2024-01-10',
-          status: 'completed' as const,
-          rating: 5,
-          customerName: 'Sunita Patel',
-          location: 'Andheri, Mumbai'
-        },
-        {
-          id: '2',
-          serviceName: 'Kitchen Repair',
-          description: 'Water leakage fix',
-          price: 2500,
-          date: '2024-01-18',
-          status: 'completed' as const,
-          rating: 4,
-          customerName: 'Ramesh Gupta',
-          location: 'Bandra, Mumbai'
-        },
-        {
-          id: '3',
-          serviceName: 'Emergency Call',
-          description: 'Burst pipe emergency',
-          price: 3000,
-          date: '2024-01-22',
-          status: 'pending' as const,
-          customerName: 'Meera Shah',
-          location: 'Powai, Mumbai'
+      } else {
+        // Jobs the worker has applied to or been assigned
+        const { data, error } = await supabase
+          .from('applications')
+          .select('created_at, status, jobs:job_id(id, title, description, location, budget, status, created_at, posted_by ( full_name ))')
+          .eq('worker_id', currentUser.id)
+          .order('created_at', { ascending: false });
+        if (!error && data) {
+          const mapped: ServiceRecord[] = (data as Array<{ created_at: string; status: string; jobs: { id: string; title: string; description: string; location: string; budget: number | null; status: ServiceRecord['status']; created_at: string; posted_by?: { full_name?: string } } }>)
+            .map(a => ({
+              id: a.jobs.id,
+              serviceName: a.jobs.title,
+              description: a.jobs.description,
+              price: a.jobs.budget ?? 0,
+              date: a.created_at,
+              status: a.jobs.status,
+              customerName: a.jobs.posted_by?.full_name ?? undefined,
+              location: a.jobs.location
+            }));
+          setServiceHistory(mapped);
         }
-      ];
-      
-      localStorage.setItem(`service_history_${currentUser.id}`, JSON.stringify(sampleHistory));
-      setServiceHistory(sampleHistory);
-    } else {
-      setServiceHistory(history);
-    }
+      }
+    };
+    loadHistory();
   }, [navigate]);
 
   const getStatusColor = (status: string) => {
@@ -129,7 +97,7 @@ const ServiceHistory = () => {
   const getTotalEarnings = () => {
     return serviceHistory
       .filter(record => record.status === 'completed')
-      .reduce((total, record) => total + record.price, 0);
+      .reduce((total, record) => total + (record.price || 0), 0);
   };
 
   const getCompletedJobs = () => {

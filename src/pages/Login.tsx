@@ -24,7 +24,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const user = loginUser(formData.email, formData.password);
+      const user = await loginUser(formData.email, formData.password);
       if (user) {
         toast({
           title: "Login successful!",

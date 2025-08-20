@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getCurrentUser } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 import { MapPin, Clock, DollarSign, Briefcase, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -40,24 +41,30 @@ const PostJob = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Create job posting
-    const jobPosting = {
-      id: Date.now().toString(),
-      ...formData,
-      customerId: user?.id,
-      customerName: user?.fullName,
-      postedDate: new Date().toISOString(),
-      status: 'open',
-      responses: []
-    };
+    if (!user) return;
 
-    // Save to localStorage
-    const existingJobs = JSON.parse(localStorage.getItem('job_postings') || '[]');
-    existingJobs.push(jobPosting);
-    localStorage.setItem('job_postings', JSON.stringify(existingJobs));
+    const { error } = await supabase.from('jobs').insert({
+      title: formData.title,
+      description: formData.description,
+      category: formData.category,
+      location: formData.location,
+      budget: Number(String(formData.budget).replace(/[^0-9.]/g, '')) || null,
+      posted_by: user.id,
+      urgency: formData.urgency,
+      preferred_date: formData.preferredDate ? new Date(formData.preferredDate) : null,
+      contact_method: formData.contactMethod
+    });
+
+    if (error) {
+      toast({
+        title: "Failed to post job",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
 
     toast({
       title: "Job Posted Successfully!",

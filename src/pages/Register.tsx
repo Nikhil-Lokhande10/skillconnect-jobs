@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { User, Briefcase, MapPin, Upload, Mail, Phone, Lock } from "lucide-react
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import BackButton from "@/components/BackButton";
-import { saveUser, savePassword } from "@/utils/auth";
+import { supabase } from "@/lib/supabaseClient";
 
 const Register = () => {
   const [searchParams] = useSearchParams();
@@ -54,40 +54,54 @@ const Register = () => {
     }
 
     setIsLoading(true);
-    try {
-      const user = saveUser({
-        fullName: userFormData.fullName,
-        email: userFormData.email,
-        mobile: userFormData.mobile,
-        location: userFormData.location,
-        userType: 'customer'
-      });
-      
-      savePassword(userFormData.email, userFormData.password);
+    const { data, error } = await supabase.auth.signUp({
+      email: userFormData.email,
+      password: userFormData.password
+    });
+    if (!error && data.user) {
+      // Ensure we have a session (RLS requires authenticated user)
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({
+          email: userFormData.email,
+          password: userFormData.password,
+        });
+      }
+      // Update profile (trigger might have created a default 'client' row)
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({
+          email: userFormData.email,
+          full_name: userFormData.fullName,
+          role: 'client'
+        })
+        .eq('user_id', data.user.id);
+      if (profErr) {
+        // Fallback to upsert with conflict on user_id
+        await supabase
+          .from("profiles")
+          .upsert({
+            user_id: data.user.id,
+            email: userFormData.email,
+            full_name: userFormData.fullName,
+            role: 'client'
+          }, { onConflict: 'user_id' });
+      }
       
       toast({
         title: "Registration successful!",
         description: "Your customer account has been created successfully.",
       });
       
-      // Auto-login after successful registration
-      localStorage.setItem('skillconnect_auth', JSON.stringify(user));
-      
-      toast({
-        title: "Registration successful!",
-        description: "Welcome to SkillConnect! You're now logged in.",
-      });
-      
-      navigate("/");
-    } catch (error) {
+      // Navigate to login to complete email confirmation or session
+      navigate("/login");
+    } else {
       toast({
         title: "Registration failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const handleWorkerSubmit = async (e: React.FormEvent) => {
@@ -103,24 +117,50 @@ const Register = () => {
     }
 
     setIsLoading(true);
-    try {
-      const user = saveUser({
-        fullName: workerFormData.fullName,
-        email: workerFormData.email,
-        mobile: workerFormData.mobile,
-        location: workerFormData.location,
-        userType: 'worker',
-        skills: workerFormData.skills,
-        experience: workerFormData.experience,
-        serviceArea: workerFormData.serviceArea
-      });
+    const { data, error } = await supabase.auth.signUp({
+      email: workerFormData.email,
+      password: workerFormData.password
+    });
+    if (!error && data.user) {
+      // Ensure we have a session (RLS requires authenticated user)
+      if (!data.session) {
+        await supabase.auth.signInWithPassword({
+          email: workerFormData.email,
+          password: workerFormData.password,
+        });
+      }
+      // Update role and details (trigger might have created a default 'client' row)
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({
+          email: workerFormData.email,
+          full_name: workerFormData.fullName,
+          role: 'worker',
+          skills: workerFormData.skills.split(',').map(s => s.trim()),
+          experience_years: parseInt(workerFormData.experience || '0', 10),
+          availability: { serviceArea: workerFormData.serviceArea }
+        })
+        .eq('user_id', data.user.id);
+      if (profErr) {
+        await supabase
+          .from("profiles")
+          .upsert({
+            user_id: data.user.id,
+            email: workerFormData.email,
+            full_name: workerFormData.fullName,
+            role: 'worker',
+            skills: workerFormData.skills.split(',').map(s => s.trim()),
+            experience_years: parseInt(workerFormData.experience || '0', 10),
+            availability: { serviceArea: workerFormData.serviceArea }
+          }, { onConflict: 'user_id' });
+      }
       
       // Save profile picture and ID proof
       if (workerFormData.profilePicture) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const base64String = e.target?.result as string;
-          localStorage.setItem(`profile_picture_${user.id}`, base64String);
+          localStorage.setItem(`profile_picture_${data.user.id}`, base64String);
         };
         reader.readAsDataURL(workerFormData.profilePicture);
       }
@@ -129,36 +169,26 @@ const Register = () => {
         const reader = new FileReader();
         reader.onload = (e) => {
           const base64String = e.target?.result as string;
-          localStorage.setItem(`id_proof_${user.id}`, base64String);
+          localStorage.setItem(`id_proof_${data.user.id}`, base64String);
         };
         reader.readAsDataURL(workerFormData.idProof);
       }
-      
-      savePassword(workerFormData.email, workerFormData.password);
       
       toast({
         title: "Registration successful!",
         description: "Your professional account has been created successfully.",
       });
       
-      // Auto-login after successful registration
-      localStorage.setItem('skillconnect_auth', JSON.stringify(user));
-      
-      toast({
-        title: "Registration successful!",
-        description: "Welcome to SkillConnect! You're now logged in.",
-      });
-      
-      navigate("/");
-    } catch (error) {
+      // Navigate to login
+      navigate("/login");
+    } else {
       toast({
         title: "Registration failed",
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description: error.message,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   return (

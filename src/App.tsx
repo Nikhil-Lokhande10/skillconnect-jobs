@@ -17,6 +17,7 @@ import Profile from "./pages/Profile";
 import ServiceHistory from "./pages/ServiceHistory";
 import PostJob from "./pages/PostJob";
 import ManageServices from "./pages/ManageServices";
+import Applications from "./pages/Applications";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/service-history" element={<ServiceHistory />} />
             <Route path="/post-job" element={<PostJob />} />
             <Route path="/manage-services" element={<ManageServices />} />
+            <Route path="/applications" element={<Applications />} />
             <Route path="/service/:serviceName" element={<ServiceDetail />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
