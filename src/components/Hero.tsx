@@ -25,13 +25,31 @@ const Hero = () => {
     "Plumbing", "Security", "Tutoring", "Web Design"
   ].sort();
 
-  const locationSuggestions = [
-    "Mumbai, Maharashtra", "Delhi, Delhi", "Bengaluru, Karnataka", "Hyderabad, Telangana",
-    "Ahmedabad, Gujarat", "Chennai, Tamil Nadu", "Kolkata, West Bengal", "Surat, Gujarat",
-    "Pune, Maharashtra", "Jaipur, Rajasthan", "Lucknow, Uttar Pradesh", "Kanpur, Uttar Pradesh",
-    "Nagpur, Maharashtra", "Indore, Madhya Pradesh", "Thane, Maharashtra", "Bhopal, Madhya Pradesh",
-    "Visakhapatnam, Andhra Pradesh", "Pimpri-Chinchwad, Maharashtra", "Patna, Bihar", "Vadodara, Gujarat"
-  ];
+  const [locationSuggestions, setLocationSuggestions] = useState<string[]>([]);
+
+  useEffect(() => {
+    setCurrentUser(getCurrentUser());
+    // Fetch Indian cities from API
+    fetch("https://countriesnow.space/api/v0.1/countries/cities", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ country: "India" })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.data && Array.isArray(data.data)) {
+          setLocationSuggestions(data.data);
+        }
+      })
+      .catch(() => {
+        // fallback to default cities if needed
+        setLocationSuggestions([
+          "Mumbai", "Delhi", "Bengaluru", "Hyderabad", "Ahmedabad", "Chennai", "Kolkata", "Surat",
+          "Pune", "Jaipur", "Lucknow", "Kanpur", "Nagpur", "Indore", "Thane", "Bhopal",
+          "Visakhapatnam", "Pimpri-Chinchwad", "Patna", "Vadodara"
+        ]);
+      });
+  }, []);
 
   const filteredServices = serviceSuggestions.filter(service =>
     service.toLowerCase().includes(serviceQuery.toLowerCase())
